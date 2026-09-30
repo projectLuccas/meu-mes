@@ -1198,7 +1198,7 @@ deleteMonthButton
             const confirmed =
                 confirm(
 
-                    `Excluir ${monthName}?\n\nTodas as entradas e gastos desse mês serão apagados.`
+                    `Excluir ${monthName}?\n\nTodos os ganhos e gastos desse mês serão apagados.`
 
                 );
 
@@ -1678,7 +1678,7 @@ function renderInsights(
                     "👋 Comece seu mês",
 
                 text:
-                    "Adicione suas entradas e seus gastos para começar a acompanhar sua vida financeira."
+                    "Adicione seus ganhos e seus gastos para começar a acompanhar sua vida financeira."
 
             },
 
@@ -1731,7 +1731,7 @@ function renderInsights(
         insights.push({
 
             title:
-                "💰 Cadastre suas entradas",
+                "💰 Cadastre seus ganhos",
 
             text:
                 `Você registrou ${formatMoney(totals.totalExpenses)} em gastos, mas ainda não informou nenhuma entrada.`
@@ -1809,7 +1809,7 @@ function renderInsights(
                     "🔴 Gastos acima da renda",
 
                 text:
-                    `Seus gastos ultrapassaram suas entradas em ${formatMoney(Math.abs(totals.balance))}.`
+                    `Seus gastos ultrapassaram seus ganhos em ${formatMoney(Math.abs(totals.balance))}.`
 
             });
 
@@ -2284,7 +2284,7 @@ function renderHistory() {
 
 
                 <p>
-                    Entradas
+                    Ganhos
                 </p>
 
                 <strong>
