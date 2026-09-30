@@ -2066,3 +2066,40 @@ body.dark .add-month-button {
     }
 
 }
+
+/* =========================================
+   EMOJI PULSANDO
+========================================= */
+
+.money-heart {
+    display: inline-block;
+    transform-origin: center;
+    animation: moneyHeartbeat 1.15s ease-in-out infinite;
+}
+
+@keyframes moneyHeartbeat {
+
+    0% {
+        transform: scale(1);
+    }
+
+    14% {
+        transform: scale(1.22);
+    }
+
+    28% {
+        transform: scale(1);
+    }
+
+    42% {
+        transform: scale(1.22);
+    }
+
+    70% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
