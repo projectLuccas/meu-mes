@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+    >
+
+    <meta name="theme-color" content="#f4f5f7">
+
+    <title>MeuMês | Controle Financeiro</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+
+<body>
+
+<header class="header">
+
+    <div class="brand">
+        <h1>MeuMês</h1>
+        <p>Seu dinheiro, mês a mês.</p>
+    </div>
+
+    <button
+        id="themeButton"
+        class="icon-button"
+        type="button"
+        aria-label="Alterar tema"
+    >
+        🌙
+    </button>
+
+</header>
+
+
+<main class="container">
+
+
+    <!-- ========================================
+         MÊS
+    ========================================= -->
+
+    <section class="month-section">
+
+        <div class="month-navigation">
+
+            <button
+                id="previousMonth"
+                class="month-arrow"
+                type="button"
+                aria-label="Mês anterior"
+            >
+                ‹
+            </button>
+
+
+            <div class="month-title">
+
+                <span>VISUALIZANDO</span>
+
+                <h2 id="currentMonth">
+                    Outubro 2026
+                </h2>
+
+            </div>
+
+
+            <button
+                id="nextMonth"
+                class="month-arrow"
+                type="button"
+                aria-label="Próximo mês"
+            >
+                ›
+            </button>
+
+        </div>
+
+
+        <div class="month-actions">
+
+            <button
+                id="addMonthButton"
+                class="add-month-button"
+                type="button"
+            >
+                + Novo mês
+            </button>
+
+
+            <button
+                id="deleteMonthButton"
+                class="delete-month-button hidden"
+                type="button"
+            >
+                Excluir mês
+            </button>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ========================================
+         CARDS PRINCIPAIS
+    ========================================= -->
+
+    <section class="summary-grid">
+
+
+        <article class="summary-card income-card">
+
+            <div class="card-icon">
+                ↗
+            </div>
+
+            <div class="summary-content">
+
+                <span>Entradas</span>
+
+                <strong id="totalIncome">
+                    R$ 0,00
+                </strong>
+
+            </div>
+
+        </article>
+
+
+
+        <article class="summary-card expense-card">
+
+            <div class="card-icon">
+                ↘
+            </div>
+
+            <div class="summary-content">
+
+                <span>Gastos</span>
+
+                <strong id="totalExpenses">
+                    R$ 0,00
+                </strong>
+
+            </div>
+
+        </article>
+
+
+
+        <article class="summary-card balance-card">
+
+            <div class="card-icon">
+                $
+            </div>
+
+            <div class="summary-content">
+
+                <span>Saldo</span>
+
+                <strong id="balance">
+                    R$ 0,00
+                </strong>
+
+            </div>
+
+        </article>
+
+    </section>
+
+
+
+    <!-- ========================================
+         BALANÇA DO MÊS
+    ========================================= -->
+
+    <section class="panel financial-health">
+
+
+        <div class="panel-title">
+
+            <div>
+
+                <span class="eyebrow">
+                    BALANÇA DO MÊS
+                </span>
+
+                <h2>
+                    Como está seu dinheiro?
+                </h2>
+
+            </div>
+
+
+            <strong id="spentPercentage">
+                0%
+            </strong>
+
+        </div>
+
+
+
+        <div class="progress">
+
+            <div
+                id="spentProgress"
+                class="progress-bar"
+            ></div>
+
+        </div>
+
+
+        <div class="progress-information">
+
+            <span>0%</span>
+
+            <span>da renda utilizada</span>
+
+            <span>100%</span>
+
+        </div>
+
+
+
+        <div class="financial-details">
+
+
+            <div class="financial-detail">
+
+                <span>Recebido</span>
+
+                <strong id="detailIncome">
+                    R$ 0,00
+                </strong>
+
+            </div>
+
+
+            <div class="financial-detail">
+
+                <span>Pago</span>
+
+                <strong id="detailPaid">
+                    R$ 0,00
+                </strong>
+
+            </div>
+
+
+            <div class="financial-detail">
+
+                <span>Pendente</span>
+
+                <strong id="detailPending">
+                    R$ 0,00
+                </strong>
+
+            </div>
+
+
+            <div class="financial-detail">
+
+                <span>Disponível</span>
+
+                <strong id="detailAvailable">
+                    R$ 0,00
+                </strong>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ========================================
+         ENTRADAS E GASTOS
+    ========================================= -->
+
+    <div class="content-grid">
+
+
+        <!-- ENTRADAS -->
+
+        <section class="panel">
+
+            <div class="section-header">
+
+                <div>
+
+                    <span class="eyebrow">
+                        DINHEIRO QUE ENTROU
+                    </span>
+
+                    <h2>Entradas</h2>
+
+                </div>
+
+
+                <button
+                    id="addIncomeButton"
+                    class="primary-button"
+                    type="button"
+                >
+                    + Entrada
+                </button>
+
+            </div>
+
+
+            <div
+                id="incomeList"
+                class="transaction-list"
+            ></div>
+
+        </section>
+
+
+
+        <!-- GASTOS -->
+
+        <section class="panel">
+
+            <div class="section-header">
+
+                <div>
+
+                    <span class="eyebrow">
+                        PARA ONDE FOI
+                    </span>
+
+                    <h2>Gastos</h2>
+
+                </div>
+
+
+                <button
+                    id="addExpenseButton"
+                    class="primary-button"
+                    type="button"
+                >
+                    + Gasto
+                </button>
+
+            </div>
+
+
+            <div
+                id="expenseList"
+                class="transaction-list"
+            ></div>
+
+        </section>
+
+    </div>
+
+
+
+    <!-- ========================================
+         INSIGHTS
+    ========================================= -->
+
+    <section class="panel insights-panel">
+
+        <div class="section-header">
+
+            <div>
+
+                <span class="eyebrow">
+                    ANÁLISE AUTOMÁTICA
+                </span>
+
+                <h2>
+                    Insights do mês
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="insights"
+            class="insights"
+        ></div>
+
+    </section>
+
+
+
+    <!-- ========================================
+         SUA EVOLUÇÃO
+    ========================================= -->
+
+    <section class="evolution-section">
+
+
+        <button
+            id="toggleEvolutionButton"
+            class="evolution-toggle"
+            type="button"
+        >
+
+            <div class="evolution-toggle-text">
+
+                <span class="eyebrow">
+                    SEU HISTÓRICO
+                </span>
+
+                <strong>
+                    Sua Evolução
+                </strong>
+
+            </div>
+
+
+            <div class="evolution-toggle-right">
+
+                <span id="evolutionButtonText">
+                    Mostrar
+                </span>
+
+                <span
+                    id="evolutionArrow"
+                    class="evolution-arrow"
+                >
+                    ↓
+                </span>
+
+            </div>
+
+        </button>
+
+
+
+        <div
+            id="evolutionContent"
+            class="evolution-content hidden"
+        >
+
+            <div
+                id="historyList"
+                class="history-list"
+            ></div>
+
+        </div>
+
+    </section>
+
+
+
+    <footer class="footer">
+
+        <p>
+            Seus dados são salvos automaticamente neste dispositivo.
+        </p>
+
+    </footer>
+
+
+</main>
+
+
+
+<!-- ========================================
+     MODAL
+========================================= -->
+
+<div
+    id="modal"
+    class="modal hidden"
+>
+
+    <div class="modal-overlay"></div>
+
+
+    <div class="modal-content">
+
+
+        <div class="modal-header">
+
+            <div>
+
+                <span class="eyebrow">
+                    REGISTRO
+                </span>
+
+                <h2 id="modalTitle">
+                    Novo registro
+                </h2>
+
+            </div>
+
+
+            <button
+                id="closeModal"
+                class="close-button"
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+
+        <form id="transactionForm">
+
+
+            <input
+                type="hidden"
+                id="transactionType"
+            >
+
+
+            <input
+                type="hidden"
+                id="editId"
+            >
+
+
+
+            <div class="form-group">
+
+                <label for="description">
+                    Descrição
+                </label>
+
+                <input
+                    type="text"
+                    id="description"
+                    placeholder="Ex: Dízimo, Fatura, Salário..."
+                    autocomplete="off"
+                    required
+                >
+
+            </div>
+
+
+
+            <div class="form-row">
+
+
+                <div class="form-group">
+
+                    <label for="value">
+                        Valor
+                    </label>
+
+                    <input
+                        type="number"
+                        id="value"
+                        min="0.01"
+                        step="0.01"
+                        inputmode="decimal"
+                        placeholder="0,00"
+                        required
+                    >
+
+                </div>
+
+
+
+                <div class="form-group">
+
+                    <label for="date">
+                        Data
+                    </label>
+
+                    <input
+                        type="date"
+                        id="date"
+                        required
+                    >
+
+                </div>
+
+
+            </div>
+
+
+
+            <div
+                id="statusGroup"
+                class="form-group"
+            >
+
+                <label for="status">
+                    Status
+                </label>
+
+                <select id="status">
+
+                    <option value="paid">
+                        Pago
+                    </option>
+
+                    <option value="pending">
+                        Pendente
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <button
+                type="submit"
+                class="save-button"
+            >
+                Salvar
+            </button>
+
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
