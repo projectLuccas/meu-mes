@@ -222,6 +222,17 @@ const addExpenseButton =
         "addExpenseButton"
     );
 
+    const clearIncomeButton =
+    document.getElementById(
+        "clearIncomeButton"
+    );
+
+const clearExpenseButton =
+    document.getElementById(
+        "clearExpenseButton"
+    );
+
+
 
 /* TEMA */
 
@@ -2862,7 +2873,80 @@ function deleteTransaction(
 
 }
 
+/* =========================================
+   LIMPAR TODAS AS ENTRADAS DO MÊS
+========================================= */
 
+clearIncomeButton.addEventListener(
+    "click",
+    function() {
+
+        const data =
+            getCurrentMonthData();
+
+        if (data.incomes.length === 0) {
+
+            alert(
+                "Não existem ganhos para limpar neste mês."
+            );
+
+            return;
+        }
+
+        const confirmed =
+            confirm(
+                `Deseja apagar TODOS os ganhos de ${getMonthName(currentMonthKey)}?\n\nEssa ação não poderá ser desfeita.`
+            );
+
+        if (!confirmed) {
+            return;
+        }
+
+        data.incomes = [];
+
+        saveData();
+
+        updateDashboard();
+    }
+);
+
+
+/* =========================================
+   LIMPAR TODOS OS GASTOS DO MÊS
+========================================= */
+
+clearExpenseButton.addEventListener(
+    "click",
+    function() {
+
+        const data =
+            getCurrentMonthData();
+
+        if (data.expenses.length === 0) {
+
+            alert(
+                "Não existem gastos para limpar neste mês."
+            );
+
+            return;
+        }
+
+        const confirmed =
+            confirm(
+                `Deseja apagar TODOS os gastos de ${getMonthName(currentMonthKey)}?\n\nEssa ação não poderá ser desfeita.`
+            );
+
+        if (!confirmed) {
+            return;
+        }
+
+        data.expenses = [];
+
+        saveData();
+
+        updateDashboard();
+    }
+);
 
 /* =========================================
    BOTÕES DE TRANSAÇÃO

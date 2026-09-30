@@ -1451,7 +1451,76 @@ body {
 
 }
 
+/* =========================================
+   AÇÕES DAS SEÇÕES
+========================================= */
 
+.section-actions {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.clear-button {
+    min-height: 39px;
+
+    padding:
+        9px
+        11px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 10px;
+
+    background:
+        var(--surface);
+
+    color:
+        var(--text-secondary);
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        0.2s ease;
+}
+
+.clear-button:hover {
+    border-color:
+        var(--expense);
+
+    background:
+        var(--expense-light);
+
+    color:
+        var(--expense);
+}
+
+
+/* CELULAR */
+
+@media (max-width: 600px) {
+
+    .section-actions {
+        gap: 5px;
+    }
+
+    .clear-button {
+        min-height: 37px;
+
+        padding:
+            8px
+            9px;
+
+        font-size: 10px;
+    }
+
+}
 
 /* =========================================
    DARK MODE
