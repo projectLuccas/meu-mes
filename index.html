@@ -20,6 +20,46 @@
 
 <body>
 
+<section id="authScreen" class="auth-screen">
+    <div class="auth-card">
+        <h1>Dinheiro do Mês 💵</h1>
+        <p>Acesse sua conta para acompanhar suas finanças.</p>
+
+        <form id="authForm">
+            <label for="authEmail">E-mail</label>
+            <input
+                id="authEmail"
+                type="email"
+                placeholder="Seu e-mail"
+                autocomplete="email"
+                required
+            >
+
+            <label for="authPassword">Senha</label>
+            <input
+                id="authPassword"
+                type="password"
+                placeholder="Sua senha"
+                minlength="6"
+                autocomplete="current-password"
+                required
+            >
+
+            <button id="authSubmit" type="submit">
+                Entrar
+            </button>
+        </form>
+
+        <button id="authToggle" type="button">
+            Criar uma conta
+        </button>
+
+        <p id="authMessage" role="status"></p>
+    </div>
+</section>
+
+<div id="appScreen" class="hidden"></div>
+
 <header class="header">
 
     <div class="brand">
@@ -35,6 +75,10 @@
     >
         🌙
     </button>
+
+<button id="logoutButton" type="button">
+    Sair da conta
+</button>
 
 </header>
 
@@ -488,7 +532,7 @@
 
 </main>
 
-
+</div>
 
 <!-- ========================================
      MODAL
@@ -650,8 +694,75 @@
 
 </div>
 
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="auth.js"></script>
 <script src="script.js"></script>
+<script src="sync.js"></script>
+
+
+<script>
+    let activeFinanceUserId = null;
+
+    async function handleFinanceSession(session) {
+        const user = session?.user || null;
+
+        if (!user) {
+            activeFinanceUserId = null;
+            stopFinance();
+            return;
+        }
+
+        if (activeFinanceUserId === user.id) return;
+
+        activeFinanceUserId = user.id;
+
+        try {
+            await startFinanceForUser(user);
+        } catch (error) {
+            console.error(error);
+            activeFinanceUserId = null;
+            window.financeReady = false;
+            showLoginScreen();
+            showAuthMessage(
+                "Não foi possível carregar seus dados. Verifique a conexão e as permissões do banco."
+            );
+        }
+    }
+
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+        setTimeout(() => handleFinanceSession(session), 0);
+    });
+
+    supabaseClient.auth.getSession().then(({ data, error }) => {
+        if (error) {
+            showAuthMessage(error.message);
+            return;
+        }
+
+        handleFinanceSession(data.session);
+    });
+</script>
+```
+
+## 4. Importação dos dados antigos
+
+**Não faça a importação automaticamente.** Primeiro, entre na conta e confirme que o dashboard abre corretamente.
+
+Seus dados antigos continuam guardados no `localStorage` com a chave `meuMesDataV3`. Para importar, precisamos de uma ação específica que leia essa chave, compare os registros com os do Supabase e peça sua confirmação antes de enviar.
+
+Isso é especialmente importante porque seus registros antigos podem ter IDs que não são UUIDs.
+
+## 5. Antes de publicar
+
+O código acima é uma **primeira implementação da sincronização**, mas ainda não está validado em execução com o seu banco real. Há pontos que precisam de teste, principalmente:
+
+- Políticas RLS de `months`, `incomes` e `expenses`.
+- Valores padrão e restrições das colunas no Supabase.
+- Sincronização após falhas de conexão e alterações feitas em dois dispositivos ao mesmo tempo.
+- Importação dos registros antigos.
+
+**Não publique nem use essa versão como única cópia dos seus dados ainda.** O próximo teste deve ser com uma conta sem registros importantes, criando um ganho e um gasto e verificando se ambos aparecem nas tabelas do Supabase.
 
 </body>
 

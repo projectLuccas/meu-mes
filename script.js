@@ -315,17 +315,20 @@ function loadData() {
 ========================================= */
 
 function saveData() {
+    if (!window.financeReady || !window.financeUserId) {
+        return;
+    }
+
+    const cacheKey = `meuMesCache_${window.financeUserId}`;
 
     localStorage.setItem(
-
-        STORAGE_KEY,
-
-        JSON.stringify(
-            financialData
-        )
-
+        cacheKey,
+        JSON.stringify(financialData)
     );
 
+    if (typeof window.queueFinanceSync === "function") {
+        window.queueFinanceSync();
+    }
 }
 
 
@@ -366,19 +369,7 @@ function ensureInitialMonth() {
 ========================================= */
 
 function generateId() {
-
-    return (
-
-        Date.now().toString()
-
-        +
-
-        Math.random()
-            .toString(16)
-            .slice(2)
-
-    );
-
+    return crypto.randomUUID();
 }
 
 
@@ -3191,5 +3182,4 @@ function init() {
 
 }
 
-
-init();
+// O dashboard será iniciado após verificar o login.

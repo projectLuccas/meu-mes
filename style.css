@@ -2103,3 +2103,74 @@ body.dark .add-month-button {
         transform: scale(1);
     }
 }
+
+.auth-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: var(--background);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 30px;
+    border-radius: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.auth-card h1 {
+    margin-bottom: 8px;
+    font-size: 25px;
+}
+
+.auth-card p {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+
+.auth-card label {
+    display: block;
+    margin: 14px 0 6px;
+    font-size: 13px;
+}
+
+.auth-card input {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 16px;
+}
+
+.auth-card button {
+    width: 100%;
+    margin-top: 18px;
+    padding: 13px;
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#authSubmit {
+    background: var(--primary);
+    color: var(--surface);
+}
+
+#toggleAuth {
+    background: transparent;
+    color: var(--text);
+}
+
+#authMessage {
+    margin-top: 15px;
+    overflow-wrap: anywhere;
+}
