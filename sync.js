@@ -293,10 +293,11 @@ async function runFinanceSync() {
     } catch (error) {
         console.error("Erro de sincronização:", error);
         setFinanceStatus("Erro ao sincronizar. Não feche sem verificar.");
-    } finally {
-        syncRunning = false;
-    }
+   } finally {
+    syncRunning = false;
 }
+}
+
 
 window.queueFinanceSync = function () {
     if (!window.financeReady) return;
@@ -304,6 +305,7 @@ window.queueFinanceSync = function () {
     clearTimeout(syncTimer);
 
     syncTimer = setTimeout(() => {
+        syncTimer = null;
         runFinanceSync();
     }, 400);
 };
@@ -431,12 +433,24 @@ async function importLegacyFinanceData() {
         return;
     }
 
-    if (syncRunning || syncTimer) {
-        alert(
-            "Aguarde a sincronização terminar e tente novamente."
-        );
-        return;
-    }
+    if (syncRunning) {
+    alert("A sincronização ainda está em andamento. Aguarde.");
+    return;
+}
+
+if (syncTimer !== null) {
+    clearTimeout(syncTimer);
+    syncTimer = null;
+
+    alert(
+        "Havia alterações aguardando sincronização. " +
+        "A importação não foi iniciada. " +
+        "Aguarde a confirmação de salvamento antes de tentar novamente."
+    );
+
+    window.queueFinanceSync();
+    return;
+}
 
     const userId = window.financeUserId;
 
