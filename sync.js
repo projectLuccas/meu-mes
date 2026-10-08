@@ -343,3 +343,368 @@ function stopFinance() {
     showLoginScreen();
 }
 
+
+/* =========================================
+   IMPORTAÇÃO SEGURA DOS DADOS ANTIGOS
+========================================= */
+
+function getLegacyFinanceData() {
+    const raw = localStorage.getItem("meuMesDataV3");
+
+    if (!raw) {
+        throw new Error(
+            "Não foram encontrados dados antigos neste navegador."
+        );
+    }
+
+    let parsed;
+
+    try {
+        parsed = JSON.parse(raw);
+    } catch {
+        throw new Error(
+            "Os dados antigos existem, mas não estão em um formato válido."
+        );
+    }
+
+    if (
+        !parsed ||
+        typeof parsed !== "object" ||
+        Array.isArray(parsed)
+    ) {
+        throw new Error("Formato dos dados antigos inválido.");
+    }
+
+    return { raw, parsed };
+}
+
+function downloadLegacyBackup(raw) {
+    const blob = new Blob([raw], {
+        type: "application/json;charset=utf-8"
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "dinheiro-do-mes-backup-antigo.json";
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
+function legacyFingerprint(type, item, monthKey) {
+    return JSON.stringify([
+        type,
+        monthKey,
+        String(item.description || "").trim(),
+        Number(item.value),
+        String(item.date || ""),
+        type === "expenses"
+            ? String(item.status || "pending")
+            : ""
+    ]);
+}
+
+function validateLegacyItem(item, monthKey) {
+    if (!item || typeof item !== "object") {
+        return false;
+    }
+
+    return (
+        typeof item.description === "string" &&
+        item.description.trim().length > 0 &&
+        Number.isFinite(Number(item.value)) &&
+        Number(item.value) > 0 &&
+        typeof item.date === "string" &&
+        /^\d{4}-\d{2}-\d{2}$/.test(item.date) &&
+        item.date.slice(0, 7) === monthKey
+    );
+}
+
+async function importLegacyFinanceData() {
+    if (!window.financeReady || !window.financeUserId) {
+        alert("Entre na sua conta antes de importar.");
+        return;
+    }
+
+    if (syncRunning || syncTimer) {
+        alert(
+            "Aguarde a sincronização terminar e tente novamente."
+        );
+        return;
+    }
+
+    const userId = window.financeUserId;
+
+    let legacy;
+
+    try {
+        legacy = getLegacyFinanceData();
+    } catch (error) {
+        alert(error.message);
+        return;
+    }
+
+    const validMonths = Object.entries(legacy.parsed)
+        .filter(([key, month]) =>
+            /^\d{4}-(0[1-9]|1[0-2])$/.test(key) &&
+            key >= "2026-10" &&
+            month &&
+            typeof month === "object" &&
+            !Array.isArray(month)
+        );
+
+    const totalIncomes = validMonths.reduce(
+        (total, [, month]) =>
+            total + (Array.isArray(month.incomes)
+                ? month.incomes.length : 0),
+        0
+    );
+
+    const totalExpenses = validMonths.reduce(
+        (total, [, month]) =>
+            total + (Array.isArray(month.expenses)
+                ? month.expenses.length : 0),
+        0
+    );
+
+    if (
+        !confirm(
+            "DADOS ANTIGOS ENCONTRADOS!\n\n" +
+            `Meses: ${validMonths.length}\n` +
+            `Ganhos: ${totalIncomes}\n` +
+            `Gastos: ${totalExpenses}\n\n` +
+            "Deseja preparar a importação?"
+        )
+    ) {
+        return;
+    }
+
+    // Backup dos dados originais, antes de qualquer alteração.
+    downloadLegacyBackup(legacy.raw);
+
+    if (
+        !confirm(
+            "Foi solicitado o download do backup.\n\n" +
+            "Verifique se o arquivo JSON foi realmente salvo " +
+            "no seu celular antes de continuar.\n\n" +
+            "Você confirmou que o backup está salvo?"
+        )
+    ) {
+        return;
+    }
+
+    if (
+        !confirm(
+            "CONFIRMAR IMPORTAÇÃO\n\n" +
+            "Os registros serão adicionados à sua conta.\n" +
+            "Registros com os mesmos dados de outro já existente " +
+            "serão ignorados.\n\n" +
+            "O armazenamento antigo não será apagado.\n\n" +
+            "Deseja continuar?"
+        )
+    ) {
+        return;
+    }
+
+    const button = document.getElementById(
+        "importLegacyFinanceButton"
+    );
+
+    let inserted = 0;
+    let skipped = 0;
+    let invalid = 0;
+    let errorMessage = null;
+
+    button.disabled = true;
+    window.financeReady = false;
+
+    try {
+        setFinanceStatus("Lendo registros da nuvem...");
+
+        const cloud = await loadFinanceFromCloud();
+
+        const fingerprints = new Set();
+        const existingIds = new Set();
+
+        for (const [monthKey, month] of Object.entries(cloud)) {
+            for (const type of ["incomes", "expenses"]) {
+                for (const item of month[type]) {
+                    fingerprints.add(
+                        legacyFingerprint(type, item, monthKey)
+                    );
+
+                    existingIds.add(item.id);
+                }
+            }
+        }
+
+        for (const [monthKey, month] of validMonths) {
+            const { data: sessionData, error: sessionError } =
+                await supabaseClient.auth.getUser();
+
+            if (
+                sessionError ||
+                sessionData.user?.id !== userId
+            ) {
+                throw new Error(
+                    "A sessão mudou durante a importação."
+                );
+            }
+
+            // Garante que o mês exista na nuvem.
+            await checkFinanceError(
+                await supabaseClient
+                    .from("months")
+                    .upsert(
+                        {
+                            user_id: userId,
+                            month_key: monthKey
+                        },
+                        {
+                            onConflict: "user_id,month_key"
+                        }
+                    )
+            );
+
+            for (const type of ["incomes", "expenses"]) {
+                const records = Array.isArray(month[type])
+                    ? month[type]
+                    : [];
+
+                for (const item of records) {
+                    if (!validateLegacyItem(item, monthKey)) {
+                        invalid++;
+                        continue;
+                    }
+
+                    const fingerprint = legacyFingerprint(
+                        type,
+                        item,
+                        monthKey
+                    );
+
+                    if (fingerprints.has(fingerprint)) {
+                        skipped++;
+                        continue;
+                    }
+
+                    const id =
+                        isUUID(item.id) && !existingIds.has(item.id)
+                            ? item.id
+                            : crypto.randomUUID();
+
+                    const row = {
+                        id,
+                        user_id: userId,
+                        month_key: monthKey,
+                        description: item.description.trim(),
+                        value: Number(item.value),
+                        transaction_date: item.date
+                    };
+
+                    if (type === "expenses") {
+                        row.status = item.status === "paid"
+                            ? "paid"
+                            : "pending";
+                    }
+
+                    setFinanceStatus(
+                        `Importando registros... ${inserted} enviados`
+                    );
+
+                    await checkFinanceError(
+                        await supabaseClient
+                            .from(type)
+                            .insert(row)
+                    );
+
+                    inserted++;
+                    existingIds.add(id);
+                    fingerprints.add(fingerprint);
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Falha na importação:", error);
+        errorMessage = error.message;
+    } finally {
+        // Recarrega a situação real da nuvem, inclusive se
+        // a importação tiver sido interrompida parcialmente.
+        try {
+            await startFinanceForUser({ id: userId });
+        } catch (reloadError) {
+            console.error("Falha ao recarregar:", reloadError);
+            window.financeReady = false;
+            errorMessage = (
+                errorMessage || "Não foi possível recarregar a nuvem."
+            );
+        }
+
+        button.disabled = false;
+    }
+
+    if (errorMessage) {
+        setFinanceStatus("Importação interrompida. Verifique os dados.");
+
+        alert(
+            "A importação foi interrompida.\n\n" +
+            `Registros enviados: ${inserted}\n` +
+            `Duplicados ignorados: ${skipped}\n` +
+            `Registros inválidos: ${invalid}\n\n` +
+            `Erro: ${errorMessage}\n\n` +
+            "Seus dados antigos e o backup foram preservados. " +
+            "Não repita a operação antes de conferir o resultado."
+        );
+
+        return;
+    }
+
+    setFinanceStatus("Importação concluída");
+
+    alert(
+        "IMPORTAÇÃO FINALIZADA!\n\n" +
+        `Registros importados: ${inserted}\n` +
+        `Duplicados ignorados: ${skipped}\n` +
+        `Registros inválidos: ${invalid}\n\n` +
+        "Seus dados antigos continuam no navegador."
+    );
+}
+
+// Cria o botão sem exigir alterações no HTML.
+function createLegacyImportButton() {
+    if (document.getElementById("importLegacyFinanceButton")) {
+        return;
+    }
+
+    const button = document.createElement("button");
+
+    button.id = "importLegacyFinanceButton";
+    button.type = "button";
+    button.textContent = "📥 Importar dados antigos";
+
+    button.style.padding = "12px 18px";
+    button.style.margin = "12px";
+    button.style.borderRadius = "10px";
+    button.style.cursor = "pointer";
+    button.style.border = "1px solid #aaa";
+
+    button.addEventListener(
+        "click",
+        importLegacyFinanceData
+    );
+
+    const main = document.querySelector("#appScreen main");
+
+    if (main) {
+        main.prepend(button);
+    } else {
+        document.getElementById("appScreen")?.prepend(button);
+    }
+}
+
+createLegacyImportButton();

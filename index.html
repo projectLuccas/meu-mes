@@ -699,6 +699,7 @@
 <script src="auth.js"></script>
 <script src="script.js"></script>
 <script src="sync.js"></script>
+<script src="import.js"></script>
 
 
 <script>
@@ -743,26 +744,6 @@
         handleFinanceSession(data.session);
     });
 </script>
-```
-
-## 4. Importação dos dados antigos
-
-**Não faça a importação automaticamente.** Primeiro, entre na conta e confirme que o dashboard abre corretamente.
-
-Seus dados antigos continuam guardados no `localStorage` com a chave `meuMesDataV3`. Para importar, precisamos de uma ação específica que leia essa chave, compare os registros com os do Supabase e peça sua confirmação antes de enviar.
-
-Isso é especialmente importante porque seus registros antigos podem ter IDs que não são UUIDs.
-
-## 5. Antes de publicar
-
-O código acima é uma **primeira implementação da sincronização**, mas ainda não está validado em execução com o seu banco real. Há pontos que precisam de teste, principalmente:
-
-- Políticas RLS de `months`, `incomes` e `expenses`.
-- Valores padrão e restrições das colunas no Supabase.
-- Sincronização após falhas de conexão e alterações feitas em dois dispositivos ao mesmo tempo.
-- Importação dos registros antigos.
-
-**Não publique nem use essa versão como única cópia dos seus dados ainda.** O próximo teste deve ser com uma conta sem registros importantes, criando um ganho e um gasto e verificando se ambos aparecem nas tabelas do Supabase.
 
 </body>
 
